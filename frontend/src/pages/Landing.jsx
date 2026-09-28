@@ -42,7 +42,6 @@ export default function Landing() {
       </div>
 
       <h1
-        onClick={() => navigate("/app")}
         className="fade-in"
         style={{
           margin: 0,
@@ -51,7 +50,6 @@ export default function Landing() {
           fontWeight: 700,
           color: "var(--accent)",
           lineHeight: 1,
-          cursor: "pointer",
         }}
       >
         Klartext
@@ -136,6 +134,31 @@ export default function Landing() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div
+        className="fade-in"
+        style={{
+          marginTop: 40,
+          width: "100%",
+          maxWidth: 640,
+          background: "var(--card)",
+          border: "1px solid var(--border)",
+          borderRadius: 16,
+          padding: 24,
+          textAlign: "left",
+        }}
+      >
+        <h2 style={{ margin: "0 0 8px", fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600 }}>
+          Sobre o Klartext
+        </h2>
+        <p style={{ margin: 0, fontSize: 14, lineHeight: "21px", color: "var(--ink-2)" }}>
+          Klartext é seu tutor pessoal de alemão: converse livremente com correções na hora,
+          ou treine com exercícios de vocabulário, gramática e tradução. O app guarda seu
+          progresso entre sessões e evita repetir palavras que você já domina, priorizando
+          o que ainda precisa de reforço. Pensado como complemento ao Duolingo, para você
+          treinar alemão de verdade — no seu ritmo.
+        </p>
       </div>
 
       <div

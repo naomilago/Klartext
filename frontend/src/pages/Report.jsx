@@ -86,7 +86,7 @@ export default function Report() {
         <div style={{ width: 1, height: 24, background: "var(--border)" }} />
         <TutorAvatar size={36} />
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <Link to="/app" style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>
+          <Link to="/" style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>
             Klartext
           </Link>
           <span style={{ fontSize: 12, color: "var(--ink-2)" }}>Relatório de progresso</span>
