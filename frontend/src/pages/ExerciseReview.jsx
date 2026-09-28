@@ -115,7 +115,7 @@ export default function ExerciseReview() {
   }));
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
       <div
         style={{
           flexShrink: 0,

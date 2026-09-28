@@ -129,7 +129,18 @@ export default function Home() {
         flexDirection: "column",
       }}
     >
-      <div style={{ padding: "32px 56px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          background: "var(--bg)",
+          padding: "32px 56px 0",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Link to="/" style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--accent)" }}>
           Klartext
         </Link>

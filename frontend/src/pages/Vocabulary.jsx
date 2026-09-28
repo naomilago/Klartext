@@ -52,7 +52,7 @@ export default function Vocabulary() {
   const filtered = filter === "todas" ? words : words.filter((w) => w.status === filter);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
       <div
         style={{
           flexShrink: 0,

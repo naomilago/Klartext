@@ -67,7 +67,7 @@ export default function Report() {
   const categoryEntries = Object.entries(data.category_breakdown ?? {});
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
       <div
         style={{
           flexShrink: 0,
