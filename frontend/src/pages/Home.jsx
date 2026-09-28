@@ -12,6 +12,7 @@ import {
 } from "../api";
 import { MessageCircleIcon, CheckSquareIcon, TrashIcon } from "../components/icons";
 import Avatar from "../components/Avatar";
+import ThemeToggle from "../components/ThemeToggle";
 
 function formatDate(iso) {
   const date = new Date(iso);
@@ -97,6 +98,7 @@ export default function Home() {
 
   return (
     <div
+      className="fade-in-simple"
       style={{
         minHeight: "100vh",
         background: "var(--bg)",
@@ -105,12 +107,13 @@ export default function Home() {
       }}
     >
       <div style={{ padding: "32px 56px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--accent)" }}>
+        <Link to="/app" style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--accent)" }}>
           Klartext
-        </span>
+        </Link>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontSize: 14, color: "var(--ink-2)" }}>Olá, Naomi</span>
           <Avatar size={36} />
+          <ThemeToggle />
         </div>
       </div>
 
@@ -127,6 +130,7 @@ export default function Home() {
         <button
           onClick={startChat}
           disabled={starting}
+          className="mode-card fade-in"
           style={{
             flex: "1 1 320px",
             display: "flex",
@@ -139,6 +143,7 @@ export default function Home() {
             textAlign: "left",
             font: "inherit",
             color: "inherit",
+            cursor: "pointer",
           }}
         >
           <div
@@ -169,6 +174,7 @@ export default function Home() {
         <button
           onClick={startExercise}
           disabled={starting}
+          className="mode-card fade-in"
           style={{
             flex: "1 1 320px",
             display: "flex",
@@ -181,6 +187,7 @@ export default function Home() {
             textAlign: "left",
             font: "inherit",
             color: "inherit",
+            cursor: "pointer",
           }}
         >
           <div
@@ -237,7 +244,7 @@ export default function Home() {
                 <Link to={`/chat/${chat.id}/view`} style={{ display: "block", flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-2)" }}>{formatDate(chat.updated_at)}</span>
-                    <span style={{ fontSize: 12, color: "#8a8177" }}>{chat.message_count} mensagens</span>
+                    <span style={{ fontSize: 12, color: "var(--ink-2)" }}>{chat.message_count} mensagens</span>
                   </div>
                   <p style={{ margin: 0, fontSize: 14 }}>{chat.title ?? chat.preview}</p>
                 </Link>

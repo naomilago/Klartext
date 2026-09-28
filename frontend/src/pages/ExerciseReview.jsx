@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { createExercise, getExercise } from "../api";
 import { AwardIcon, ChevronLeftIcon } from "../components/icons";
 import Markdown from "../components/Markdown";
+import ThemeToggle from "../components/ThemeToggle";
 
 const CATEGORY_LABELS = {
   vocabulario: "Vocabulário",
@@ -126,7 +127,7 @@ export default function ExerciseReview() {
           background: "var(--card)",
         }}
       >
-        <Link to="/" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--ink-2)", fontSize: 14, fontWeight: 600 }}>
+        <Link to="/app" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--ink-2)", fontSize: 14, fontWeight: 600 }}>
           <ChevronLeftIcon />
           Início
         </Link>
@@ -134,21 +135,23 @@ export default function ExerciseReview() {
         <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15 }}>
           {data.title ?? "Exercício"}
         </span>
-        {!data.is_finished && (
-          <span
-            style={{
-              marginLeft: "auto",
-              background: "var(--amber-tint)",
-              color: "var(--amber-ink)",
-              fontSize: 12,
-              fontWeight: 700,
-              padding: "6px 12px",
-              borderRadius: 999,
-            }}
-          >
-            Em andamento
-          </span>
-        )}
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          {!data.is_finished && (
+            <span
+              style={{
+                background: "var(--amber-tint)",
+                color: "var(--amber-ink)",
+                fontSize: 12,
+                fontWeight: 700,
+                padding: "6px 12px",
+                borderRadius: 999,
+              }}
+            >
+              Em andamento
+            </span>
+          )}
+          <ThemeToggle size={32} />
+        </div>
       </div>
 
       <div style={{ flexGrow: 1, minHeight: 0, overflowY: "auto", padding: "32px 40px", display: "flex", justifyContent: "center" }}>
@@ -207,7 +210,7 @@ export default function ExerciseReview() {
               )}
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
                 <Link
-                  to="/"
+                  to="/app"
                   style={{ background: "var(--accent)", color: "#fff", fontWeight: 600, fontSize: 14, padding: "12px 28px", borderRadius: 999 }}
                 >
                   Voltar ao início

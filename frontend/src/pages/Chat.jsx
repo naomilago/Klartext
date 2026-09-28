@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { getChat, sendMessage } from "../api";
 import { ChevronLeftIcon, SendIcon, TutorAvatar } from "../components/icons";
 import Markdown from "../components/Markdown";
+import ThemeToggle from "../components/ThemeToggle";
 
 function TypingDots() {
   return (
@@ -19,6 +20,7 @@ function Bubble({ role, content, isStreaming }) {
   const isEmptyStreaming = isStreaming && content === "";
   return (
     <div
+      className="fade-in"
       style={{
         maxWidth: 560,
         alignSelf: isUser ? "flex-end" : "flex-start",
@@ -104,7 +106,7 @@ export default function Chat({ readOnly = false }) {
           background: "var(--card)",
         }}
       >
-        <Link to="/" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--ink-2)", fontSize: 14, fontWeight: 600 }}>
+        <Link to="/app" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--ink-2)", fontSize: 14, fontWeight: 600 }}>
           <ChevronLeftIcon />
           Início
         </Link>
@@ -127,6 +129,7 @@ export default function Chat({ readOnly = false }) {
         >
           {readOnly ? "Somente leitura" : "Nível A1"}
         </span>
+        <ThemeToggle size={32} />
       </div>
 
       <div style={{ flexGrow: 1, minHeight: 0, overflowY: "auto", padding: "32px 96px", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -190,6 +193,8 @@ export default function Chat({ readOnly = false }) {
             flexGrow: 1,
             padding: "12px 16px",
             border: "1px solid var(--border)",
+            background: "var(--card)",
+            color: "var(--ink)",
             borderRadius: 999,
             fontSize: 14,
             outline: "none",

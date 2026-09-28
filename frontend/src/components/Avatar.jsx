@@ -9,14 +9,24 @@ function DefaultAvatar() {
         <clipPath id="avatar-circle-clip">
           <circle cx="20" cy="20" r="20" />
         </clipPath>
+        <linearGradient id="avatar-hair-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="var(--accent)" />
+        </linearGradient>
+        <linearGradient id="avatar-bg-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--accent-tint)" />
+          <stop offset="100%" stopColor="var(--accent-tint)" stopOpacity="0.7" />
+        </linearGradient>
       </defs>
-      <circle cx="20" cy="20" r="20" fill="var(--accent-tint)" />
+      <circle cx="20" cy="20" r="20" fill="url(#avatar-bg-grad)" />
       <g clipPath="url(#avatar-circle-clip)">
-        <path d="M4 40 C4 29 10 24 20 24 C30 24 36 29 36 40 Z" fill="var(--accent)" />
-        <ellipse cx="12" cy="24" rx="3" ry="7.5" fill="var(--accent)" />
-        <ellipse cx="28" cy="24" rx="3" ry="7.5" fill="var(--accent)" />
-        <circle cx="20" cy="15" r="9.5" fill="var(--accent)" />
-        <circle cx="20" cy="16" r="8" fill="var(--card)" />
+        <path d="M3 41 C3 28.5 10 23 20 23 C30 23 37 28.5 37 41 Z" fill="url(#avatar-hair-grad)" />
+        <path
+          d="M10.5 21 C9.5 12.5 13.5 6 20 6 C26.5 6 30.5 12.5 29.5 21 C29.2 15 25.2 10.5 20 10.5 C14.8 10.5 10.8 15 10.5 21 Z"
+          fill="url(#avatar-hair-grad)"
+        />
+        <circle cx="20" cy="16.5" r="8.2" fill="var(--card)" />
+        <path d="M12.5 16 C13 11.5 16 8.5 20 8.5 C24 8.5 27 11.5 27.5 16" fill="none" stroke="var(--accent)" strokeWidth="1.6" strokeLinecap="round" opacity="0.35" />
       </g>
     </svg>
   );

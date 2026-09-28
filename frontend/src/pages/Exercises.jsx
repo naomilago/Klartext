@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { answerExercise, getExercise } from "../api";
 import { ChevronLeftIcon } from "../components/icons";
 import Markdown from "../components/Markdown";
+import ThemeToggle from "../components/ThemeToggle";
 
 const CATEGORY_LABELS = {
   vocabulario: "Vocabulário",
@@ -166,7 +167,7 @@ export default function Exercises() {
           background: "var(--card)",
         }}
       >
-        <Link to="/" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--ink-2)", fontSize: 14, fontWeight: 600 }}>
+        <Link to="/app" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--ink-2)", fontSize: 14, fontWeight: 600 }}>
           <ChevronLeftIcon />
           Início
         </Link>
@@ -188,15 +189,18 @@ export default function Exercises() {
           >
             {correctCount} corretas
           </span>
+          <ThemeToggle size={32} />
         </div>
       </div>
 
-      <div style={{ flexShrink: 0, height: 6, background: "#efe7da" }}>
+      <div style={{ flexShrink: 0, height: 6, background: "var(--track-bg)" }}>
         <div style={{ width: `${progressPct}%`, height: 6, background: "var(--amber-fill)", transition: "width 0.3s" }} />
       </div>
 
       <div style={{ flexGrow: 1, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: 32, overflow: "auto" }}>
         <div
+          key={current.position}
+          className="fade-in"
           style={{
             width: "100%",
             maxWidth: 620,
@@ -264,6 +268,8 @@ export default function Exercises() {
                   width: "100%",
                   padding: "14px 16px",
                   border: "1px solid var(--border)",
+                  background: "var(--card)",
+                  color: "var(--ink)",
                   borderRadius: 12,
                   fontSize: 15,
                   outline: "none",
