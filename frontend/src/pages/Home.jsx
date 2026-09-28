@@ -10,7 +10,7 @@ import {
   listChats,
   listExercises,
 } from "../api";
-import { MessageCircleIcon, CheckSquareIcon, TrashIcon, BarChartIcon } from "../components/icons";
+import { MessageCircleIcon, CheckSquareIcon, TrashIcon, BarChartIcon, BookOpenIcon } from "../components/icons";
 import Avatar from "../components/Avatar";
 import ThemeToggle from "../components/ThemeToggle";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -134,6 +134,13 @@ export default function Home() {
           Klartext
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <Link
+            to="/vocabulario"
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, color: "var(--ink-2)" }}
+          >
+            <BookOpenIcon size={18} />
+            Vocabulário
+          </Link>
           <Link
             to="/report"
             style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, color: "var(--ink-2)" }}

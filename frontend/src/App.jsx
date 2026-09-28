@@ -5,6 +5,7 @@ import Chat from "./pages/Chat";
 import Exercises from "./pages/Exercises";
 import ExerciseReview from "./pages/ExerciseReview";
 import Report from "./pages/Report";
+import Vocabulary from "./pages/Vocabulary";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/exercises/:id" element={<Exercises />} />
       <Route path="/exercises/:id/review" element={<ExerciseReview />} />
       <Route path="/report" element={<Report />} />
+      <Route path="/vocabulario" element={<Vocabulary />} />
     </Routes>
   );
 }

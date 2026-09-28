@@ -34,7 +34,9 @@ function DefaultAvatar() {
 
 export default function Avatar({ size = 36 }) {
   const [imageSrc, setImageSrc] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const inputRef = useRef(null);
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -44,6 +46,17 @@ export default function Avatar({ size = 36 }) {
       // localStorage indisponível (ex.: navegação privada) - segue sem avatar salvo
     }
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleOutsideClick(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [menuOpen]);
 
   function handleFile(event) {
     const file = event.target.files?.[0];
@@ -61,13 +74,36 @@ export default function Avatar({ size = 36 }) {
     reader.readAsDataURL(file);
   }
 
+  function handleAvatarClick() {
+    if (imageSrc) {
+      setMenuOpen((open) => !open);
+    } else {
+      inputRef.current?.click();
+    }
+  }
+
+  function handleChoosePhoto() {
+    setMenuOpen(false);
+    inputRef.current?.click();
+  }
+
+  function handleRemovePhoto() {
+    setMenuOpen(false);
+    setImageSrc(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // sem acesso ao storage - a remoção ainda vale para esta sessão
+    }
+  }
+
   return (
-    <>
+    <div ref={wrapperRef} style={{ position: "relative", flexShrink: 0 }}>
       <button
         type="button"
-        onClick={() => inputRef.current?.click()}
-        aria-label="Alterar foto do perfil"
-        title="Alterar foto do perfil"
+        onClick={handleAvatarClick}
+        aria-label={imageSrc ? "Opções da foto do perfil" : "Adicionar foto do perfil"}
+        title={imageSrc ? "Opções da foto do perfil" : "Adicionar foto do perfil"}
         style={{
           width: size,
           height: size,
@@ -87,6 +123,60 @@ export default function Avatar({ size = 36 }) {
           <DefaultAvatar />
         )}
       </button>
+
+      {menuOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: size + 6,
+            right: 0,
+            zIndex: 20,
+            background: "var(--card)",
+            border: "1px solid var(--border)",
+            borderRadius: 12,
+            boxShadow: "0 4px 16px rgba(35,32,28,0.12)",
+            overflow: "hidden",
+            minWidth: 160,
+          }}
+        >
+          <button
+            type="button"
+            onClick={handleChoosePhoto}
+            style={{
+              display: "block",
+              width: "100%",
+              textAlign: "left",
+              padding: "10px 14px",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--ink)",
+              background: "none",
+              border: "none",
+            }}
+          >
+            Alterar foto
+          </button>
+          <button
+            type="button"
+            onClick={handleRemovePhoto}
+            style={{
+              display: "block",
+              width: "100%",
+              textAlign: "left",
+              padding: "10px 14px",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--correction-ink)",
+              background: "none",
+              border: "none",
+              borderTop: "1px solid var(--border)",
+            }}
+          >
+            Remover foto
+          </button>
+        </div>
+      )}
+
       <input
         ref={inputRef}
         type="file"
@@ -96,6 +186,6 @@ export default function Avatar({ size = 36 }) {
         aria-hidden="true"
         tabIndex={-1}
       />
-    </>
+    </div>
   );
 }

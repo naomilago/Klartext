@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { createExercise, getExercise } from "../api";
-import { AwardIcon, ChevronLeftIcon } from "../components/icons";
+import { AwardIcon, ChevronLeftIcon, TutorAvatar } from "../components/icons";
 import Markdown from "../components/Markdown";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -132,9 +132,13 @@ export default function ExerciseReview() {
           Início
         </Link>
         <div style={{ width: 1, height: 24, background: "var(--border)" }} />
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15 }}>
-          {data.title ?? "Exercício"}
-        </span>
+        <TutorAvatar size={36} />
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <Link to="/app" style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>
+            Klartext
+          </Link>
+          <span style={{ fontSize: 12, color: "var(--ink-2)" }}>{data.title ?? "Exercício"}</span>
+        </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
           {!data.is_finished && (
             <span

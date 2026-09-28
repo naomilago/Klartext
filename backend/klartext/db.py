@@ -262,6 +262,13 @@ def get_vocab_progress(conn):
     return {row["word"]: dict(row) for row in rows}
 
 
+def list_vocab_progress(conn):
+    rows = conn.execute(
+        "SELECT * FROM vocab_progress ORDER BY last_shown_at DESC"
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
 def record_vocab_result(conn, word, theme, gloss, is_correct):
     if not word:
         return

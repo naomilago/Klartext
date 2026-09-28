@@ -376,6 +376,38 @@ def get_report():
     return {**stats, **report}
 
 
+# --- Vocabulário -------------------------------------------------------------
+
+def _vocab_status(row):
+    if row["times_correct"] >= 2:
+        return "dominada"
+    if row["last_correct"] == 0:
+        return "revisar"
+    return "praticando"
+
+
+@app.get("/api/vocab")
+def list_vocab():
+    with db.get_conn() as conn:
+        rows = db.list_vocab_progress(conn)
+    return {
+        "words": [
+            {
+                "word": row["word"],
+                "theme": row["theme"],
+                "gloss": row["gloss"],
+                "times_shown": row["times_shown"],
+                "times_correct": row["times_correct"],
+                "times_incorrect": row["times_incorrect"],
+                "last_correct": bool(row["last_correct"]) if row["last_correct"] is not None else None,
+                "last_shown_at": row["last_shown_at"],
+                "status": _vocab_status(row),
+            }
+            for row in rows
+        ]
+    }
+
+
 if __name__ == "__main__":
     import os
 

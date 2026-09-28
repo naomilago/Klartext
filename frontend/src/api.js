@@ -85,3 +85,7 @@ export function answerExercise(id, answer) {
 export function getReport() {
   return request("/api/report");
 }
+
+export function getVocab() {
+  return request("/api/vocab");
+}

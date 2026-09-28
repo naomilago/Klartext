@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getReport } from "../api";
-import { AwardIcon, ChevronLeftIcon } from "../components/icons";
+import { AwardIcon, ChevronLeftIcon, TutorAvatar } from "../components/icons";
 import Markdown from "../components/Markdown";
 import ThemeToggle from "../components/ThemeToggle";
 import Footer from "../components/Footer";
@@ -84,7 +84,13 @@ export default function Report() {
           Início
         </Link>
         <div style={{ width: 1, height: 24, background: "var(--border)" }} />
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15 }}>Relatório de progresso</span>
+        <TutorAvatar size={36} />
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <Link to="/app" style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>
+            Klartext
+          </Link>
+          <span style={{ fontSize: 12, color: "var(--ink-2)" }}>Relatório de progresso</span>
+        </div>
         <div style={{ marginLeft: "auto" }}>
           <ThemeToggle size={32} />
         </div>
