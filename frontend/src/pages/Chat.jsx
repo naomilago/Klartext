@@ -185,6 +185,7 @@ export default function Chat({ readOnly = false }) {
           id="chat-input"
           type="text"
           autoComplete="off"
+          autoFocus
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Escreva em alemão (ou português, se travar)..."
