@@ -251,6 +251,10 @@ export default function Exercises() {
               <input
                 id="answer-input"
                 type="text"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 value={answerText}
                 onChange={(e) => setAnswerText(e.target.value)}
                 placeholder="Digite sua resposta em alemão..."
