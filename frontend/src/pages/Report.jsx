@@ -113,10 +113,16 @@ export default function Report() {
             >
               <AwardIcon size={26} />
             </div>
-            <span style={{ fontFamily: "var(--font-display)", fontSize: 56, fontWeight: 700, color: scoreColor(data.overall_score ?? 0) }}>
-              {data.overall_score ?? 0}
-            </span>
-            <span style={{ fontSize: 13, color: "var(--ink-2)" }}>Nota geral de progresso (0 a 100)</span>
+            {data.overall_score !== null && data.overall_score !== undefined ? (
+              <>
+                <span style={{ fontFamily: "var(--font-display)", fontSize: 56, fontWeight: 700, color: scoreColor(data.overall_score) }}>
+                  {data.overall_score}
+                </span>
+                <span style={{ fontSize: 13, color: "var(--ink-2)" }}>Nota geral de progresso (0 a 100)</span>
+              </>
+            ) : (
+              <span style={{ fontSize: 13, color: "var(--ink-2)", fontWeight: 600 }}>Ainda sem contexto suficiente</span>
+            )}
             {data.summary && (
               <div style={{ fontSize: 14, lineHeight: "21px", color: "var(--ink-2)", maxWidth: 520 }}>
                 <Markdown>{data.summary}</Markdown>

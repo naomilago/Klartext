@@ -355,6 +355,21 @@ def get_report():
     with db.get_conn() as conn:
         stats = db.get_report_stats(conn)
 
+    has_context = stats["exercise_count"] > 0 or stats["chat_count"] > 0 or stats["words_total_seen"] > 0
+    if not has_context:
+        report = {
+            "overall_score": None,
+            "summary": (
+                "Ainda não há conversas, exercícios ou palavras praticadas registrados — "
+                "não há contexto suficiente para gerar um relatório ainda. Comece uma "
+                "conversa livre ou uma rodada de exercícios para começarmos a acompanhar "
+                "seu progresso aqui."
+            ),
+            "strengths": [],
+            "improvements": [],
+        }
+        return {**stats, **report}
+
     lines = [
         f"Exercícios finalizados: {stats['exercise_count']}",
         (
