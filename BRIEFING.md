@@ -25,12 +25,11 @@ Escopo mínimo pra validar a experiência:
 - **Correções sob demanda ou quando necessário** — não corrigir cada frase automaticamente (isso cansa e quebra o fluxo); o tutor decide quando um erro atrapalha a comunicação e vale apontar, e também corrige quando a usuária pedir explicitamente.
 - Explicações de gramática/vocabulário em **português**, mantendo a conversa em alemão.
 - Streaming de resposta (evita espera longa no terminal).
-- Histórico de conversa mantido durante a sessão (sem persistência entre sessões no MVP).
+- Histórico de conversa persistido em **SQLite** — a conversa pode ser retomada entre execuções.
 
 ### Fora de escopo no MVP
 
 - Voz/áudio (fica para uma versão futura, se fizer sentido).
-- Persistência de progresso/histórico entre sessões.
 - Modo de exercícios estruturados (é a v2).
 - Frontend.
 
@@ -61,6 +60,7 @@ Mesma lógica do MVP: conversa livre em alemão, com feedback e correções sob 
 - Usar `thinking: {type: "adaptive"}` (padrão do modelo, não precisa configurar manualmente).
 - Streaming (`client.messages.stream(...)` no SDK Python) para respostas responsivas no CLI e depois no frontend.
 - System prompt deve fixar: nível A1 da usuária, idiomas de apoio (PT/EN), e as regras de quando corrigir (seção 5).
+- Persistência: **SQLite** (stdlib `sqlite3`, sem dependência extra), com tabelas `sessions` e `messages`. Ao iniciar, o CLI oferece retomar a última conversa.
 
 ## 7. Próximos passos
 
