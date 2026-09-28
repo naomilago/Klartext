@@ -13,6 +13,7 @@ import {
 import { MessageCircleIcon, CheckSquareIcon, TrashIcon } from "../components/icons";
 import Avatar from "../components/Avatar";
 import ThemeToggle from "../components/ThemeToggle";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 function formatDate(iso) {
   const date = new Date(iso);
@@ -35,6 +36,21 @@ export default function Home() {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
+  const [confirmState, setConfirmState] = useState(null);
+
+  function askConfirm(message, action) {
+    setConfirmState({ message, action });
+  }
+
+  function closeConfirm() {
+    setConfirmState(null);
+  }
+
+  async function runConfirmedAction() {
+    if (!confirmState) return;
+    await confirmState.action();
+    closeConfirm();
+  }
 
   useEffect(() => {
     Promise.all([listChats(), listExercises()])
@@ -68,32 +84,38 @@ export default function Home() {
     }
   }
 
-  async function handleDeleteChat(event, id) {
+  function handleDeleteChat(event, id) {
     event.preventDefault();
     event.stopPropagation();
-    if (!window.confirm("Excluir esta conversa? Essa ação não pode ser desfeita.")) return;
-    await deleteChat(id);
-    setChats((prev) => prev.filter((c) => c.id !== id));
+    askConfirm("Excluir esta conversa? Essa ação não pode ser desfeita.", async () => {
+      await deleteChat(id);
+      setChats((prev) => prev.filter((c) => c.id !== id));
+    });
   }
 
-  async function handleDeleteAllChats() {
-    if (chats.length === 0 || !window.confirm("Excluir TODAS as conversas? Essa ação não pode ser desfeita.")) return;
-    await deleteAllChats();
-    setChats([]);
+  function handleDeleteAllChats() {
+    if (chats.length === 0) return;
+    askConfirm("Excluir TODAS as conversas? Essa ação não pode ser desfeita.", async () => {
+      await deleteAllChats();
+      setChats([]);
+    });
   }
 
-  async function handleDeleteExercise(event, id) {
+  function handleDeleteExercise(event, id) {
     event.preventDefault();
     event.stopPropagation();
-    if (!window.confirm("Excluir este exercício? Essa ação não pode ser desfeita.")) return;
-    await deleteExercise(id);
-    setExercises((prev) => prev.filter((e) => e.id !== id));
+    askConfirm("Excluir este exercício? Essa ação não pode ser desfeita.", async () => {
+      await deleteExercise(id);
+      setExercises((prev) => prev.filter((e) => e.id !== id));
+    });
   }
 
-  async function handleDeleteAllExercises() {
-    if (exercises.length === 0 || !window.confirm("Excluir TODOS os exercícios? Essa ação não pode ser desfeita.")) return;
-    await deleteAllExercises();
-    setExercises([]);
+  function handleDeleteAllExercises() {
+    if (exercises.length === 0) return;
+    askConfirm("Excluir TODOS os exercícios? Essa ação não pode ser desfeita.", async () => {
+      await deleteAllExercises();
+      setExercises([]);
+    });
   }
 
   return (
@@ -328,6 +350,13 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!confirmState}
+        message={confirmState?.message}
+        onConfirm={runConfirmedAction}
+        onCancel={closeConfirm}
+      />
     </div>
   );
 }

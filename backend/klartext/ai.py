@@ -1,3 +1,5 @@
+import random
+
 from dotenv import load_dotenv
 from anthropic import Anthropic
 
@@ -14,11 +16,15 @@ escrever em alemão, português (sua língua nativa) ou inglês quando travar - 
 
 Regras:
 - Converse livremente em alemão, adaptando ao nível A1 (frases curtas, vocabulário básico).
-- Se a usuária misturar português/inglês ou sinalizar que travou, ofereça a ponte
-  nesses idiomas para ajudar a retomar o alemão - nunca insista em responder só em alemão.
+- Se a usuária misturar português ou sinalizar que travou, explique em português
+  (é o idioma nativo dela) para ajudar a retomar o alemão - nunca insista em
+  responder só em alemão. Só use inglês se ela escrever majoritariamente em
+  inglês ou pedir explicitamente em inglês. NUNCA alterne de idioma sem motivo —
+  mantenha o mesmo idioma de apoio (português, salvo os casos acima) durante
+  toda a conversa.
 - Não corrija cada frase automaticamente. Corrija quando o erro atrapalhar a
   comunicação, ou quando ela pedir explicitamente.
-- Ao corrigir: aponte o erro, explique o motivo brevemente em português ou inglês, e siga
+- Ao corrigir: aponte o erro, explique o motivo brevemente em português, e siga
   a conversa - sem virar aula longa.
 - Tom: paciente, encorajador, nunca condescendente.
 - Priorize comunicação sobre perfeição gramatical.
@@ -34,15 +40,76 @@ Perfil da usuária: nível A1, estuda alemão com apoio do Duolingo.
 Regras:
 - Gere perguntas variadas — vocabulário, gramática, tradução ou completar frase —
   sempre adequadas ao nível A1.
+- Varie MUITO o vocabulário. Nunca use os mesmos exemplos clichê toda vez
+  (ex.: "der Apfel", "das Buch", "die Katze", "der Hund", "das Auto") — a
+  usuária já viu esses de sobra. Sempre que uma palavra-alvo for sugerida no
+  contexto da mensagem, construa a pergunta em torno dela.
 - Varie o formato: use múltipla escolha (3 a 4 alternativas) principalmente para
   vocabulário e gramática, e resposta livre (digitação) para tradução e completar
   frase. Alterne os formatos ao longo da rodada para manter dinâmico.
 - Aqui o rigor é maior do que numa conversa livre: é o momento de treinar precisão.
 - Ao avaliar uma resposta, aceite pequenas variações razoáveis (maiúsculas, sinônimos
   válidos, pequenos erros de digitação), mas aponte erros reais de vocabulário ou gramática.
-- Feedback sempre em português, breve e direto, sem virar aula longa.
+- Feedback SEMPRE em português — nunca em inglês, mesmo que a usuária responda
+  ou escreva em inglês. Seja breve e direto, sem virar aula longa.
 - Tom: paciente e encorajador, mesmo ao apontar erros.
 """
+
+TOPIC_SEEDS = [
+    ("comida e bebida", "der Käse", "queijo"),
+    ("comida e bebida", "die Suppe", "sopa"),
+    ("comida e bebida", "das Brot", "pão"),
+    ("comida e bebida", "die Wurst", "salsicha"),
+    ("comida e bebida", "der Reis", "arroz"),
+    ("comida e bebida", "der Kaffee", "café"),
+    ("animais", "die Katze", "gato"),
+    ("animais", "der Vogel", "pássaro"),
+    ("animais", "das Pferd", "cavalo"),
+    ("animais", "die Kuh", "vaca"),
+    ("animais", "der Fisch", "peixe"),
+    ("casa e móveis", "der Tisch", "mesa"),
+    ("casa e móveis", "die Lampe", "luminária"),
+    ("casa e móveis", "das Fenster", "janela"),
+    ("casa e móveis", "die Tür", "porta"),
+    ("casa e móveis", "der Stuhl", "cadeira"),
+    ("roupas", "die Jacke", "jaqueta"),
+    ("roupas", "der Schuh", "sapato"),
+    ("roupas", "das Hemd", "camisa"),
+    ("roupas", "die Hose", "calça"),
+    ("cores", "blau", "azul"),
+    ("cores", "grün", "verde"),
+    ("cores", "gelb", "amarelo"),
+    ("clima", "der Regen", "chuva"),
+    ("clima", "die Sonne", "sol"),
+    ("clima", "der Schnee", "neve"),
+    ("viagem e transporte", "der Zug", "trem"),
+    ("viagem e transporte", "das Flugzeug", "avião"),
+    ("viagem e transporte", "der Koffer", "mala"),
+    ("profissões", "der Lehrer", "professor"),
+    ("profissões", "die Ärztin", "médica"),
+    ("profissões", "der Koch", "cozinheiro"),
+    ("corpo humano", "die Hand", "mão"),
+    ("corpo humano", "der Kopf", "cabeça"),
+    ("corpo humano", "das Auge", "olho"),
+    ("cidade e lugares", "der Park", "parque"),
+    ("cidade e lugares", "die Straße", "rua"),
+    ("cidade e lugares", "der Bahnhof", "estação"),
+    ("escola e trabalho", "der Stift", "caneta"),
+    ("escola e trabalho", "das Heft", "caderno"),
+    ("compras", "das Geld", "dinheiro"),
+    ("compras", "die Kasse", "caixa (loja)"),
+    ("família", "die Schwester", "irmã"),
+    ("família", "der Bruder", "irmão"),
+    ("família", "die Großmutter", "avó"),
+    ("sentimentos", "glücklich", "feliz"),
+    ("sentimentos", "traurig", "triste"),
+    ("rotina diária", "aufstehen", "levantar-se"),
+    ("rotina diária", "frühstücken", "tomar café da manhã"),
+    ("tecnologia", "das Handy", "celular"),
+    ("tecnologia", "der Computer", "computador"),
+    ("números e horas", "die Uhr", "relógio"),
+    ("dias e meses", "der Montag", "segunda-feira"),
+]
 
 TITLE_TOOL = {
     "name": "set_title",
@@ -108,7 +175,8 @@ EVALUATE_TOOL = {
                     "ou gramática correta em ALEMÃO (nunca compare com o gênero em português "
                     "— são independentes), decida se a resposta da usuária está certa, e só "
                     "então escreva o feedback breve e direto explicando o motivo. Preencha "
-                    "este campo ANTES do campo 'correct'."
+                    "este campo ANTES do campo 'correct'. TODO o texto deve ser em português, "
+                    "nunca em inglês, mesmo que a resposta da usuária esteja em inglês."
                 ),
             },
             "correct": {
@@ -180,14 +248,28 @@ def generate_title(content: str, fallback: str) -> str:
     return result.get("title", fallback)[:80]
 
 
+def _pick_seed(previous: list[dict]):
+    used_text = " ".join(item["question"] for item in previous).lower()
+    unused = [seed for seed in TOPIC_SEEDS if seed[1].split(" ")[-1].lower() not in used_text]
+    pool = unused or TOPIC_SEEDS
+    return random.choice(pool)
+
+
 def generate_question(previous: list[dict]) -> dict:
+    theme, seed_word, seed_gloss = _pick_seed(previous)
+    seed_line = (
+        f"Tema sorteado para esta pergunta: {theme}. "
+        f"Palavra/expressão-alvo sugerida: \"{seed_word}\" ({seed_gloss}) — "
+        "construa a pergunta em torno dela (pode adaptar a forma gramatical conforme a categoria)."
+    )
+
     if previous:
         history_text = "\n".join(
             f"- ({item['category']}) {item['question']}" for item in previous
         )
-        context = f"Perguntas já feitas nesta rodada (não repita):\n{history_text}"
+        context = f"{seed_line}\n\nPerguntas já feitas nesta rodada (não repita):\n{history_text}"
     else:
-        context = "Esta é a primeira pergunta da rodada."
+        context = f"{seed_line}\n\nEsta é a primeira pergunta da rodada."
 
     response = client.messages.create(
         model=MODEL,
