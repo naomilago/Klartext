@@ -71,7 +71,26 @@ def init_db():
                 FOREIGN KEY (session_id) REFERENCES exercise_sessions (id)
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS vocab_progress (
+                word TEXT PRIMARY KEY,
+                theme TEXT NOT NULL,
+                gloss TEXT NOT NULL,
+                times_shown INTEGER NOT NULL DEFAULT 0,
+                times_correct INTEGER NOT NULL DEFAULT 0,
+                times_incorrect INTEGER NOT NULL DEFAULT 0,
+                last_correct INTEGER,
+                last_shown_at TEXT
+            )
+        """)
+        _add_column_if_missing(conn, "exercise_items", "seed_word", "TEXT")
         conn.commit()
+
+
+def _add_column_if_missing(conn, table, column, coltype):
+    existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column not in existing:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {coltype}")
 
 
 # --- Chat sessions -----------------------------------------------------
@@ -156,12 +175,14 @@ def set_exercise_title(conn, session_id, title):
     conn.commit()
 
 
-def add_exercise_item(conn, session_id, position, category, question, item_type="resposta_livre", options_json=None):
+def add_exercise_item(
+    conn, session_id, position, category, question, item_type="resposta_livre", options_json=None, seed_word=None
+):
     conn.execute(
         """INSERT INTO exercise_items
-           (session_id, position, category, type, question, options, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
-        (session_id, position, category, item_type, question, options_json, now_iso()),
+           (session_id, position, category, type, question, options, seed_word, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (session_id, position, category, item_type, question, options_json, seed_word, now_iso()),
     )
     conn.commit()
 
@@ -232,3 +253,82 @@ def delete_all_exercise_sessions(conn):
     conn.execute("DELETE FROM exercise_items")
     conn.execute("DELETE FROM exercise_sessions")
     conn.commit()
+
+
+# --- Vocabulary progress (spaced repetition) --------------------------------
+
+def get_vocab_progress(conn):
+    rows = conn.execute("SELECT * FROM vocab_progress").fetchall()
+    return {row["word"]: dict(row) for row in rows}
+
+
+def record_vocab_result(conn, word, theme, gloss, is_correct):
+    if not word:
+        return
+    now = now_iso()
+    existing = conn.execute("SELECT * FROM vocab_progress WHERE word = ?", (word,)).fetchone()
+    if existing:
+        conn.execute(
+            """UPDATE vocab_progress
+               SET times_shown = times_shown + 1,
+                   times_correct = times_correct + ?,
+                   times_incorrect = times_incorrect + ?,
+                   last_correct = ?,
+                   last_shown_at = ?
+               WHERE word = ?""",
+            (1 if is_correct else 0, 0 if is_correct else 1, int(is_correct), now, word),
+        )
+    else:
+        conn.execute(
+            """INSERT INTO vocab_progress
+               (word, theme, gloss, times_shown, times_correct, times_incorrect, last_correct, last_shown_at)
+               VALUES (?, ?, ?, 1, ?, ?, ?, ?)""",
+            (word, theme, gloss, 1 if is_correct else 0, 0 if is_correct else 1, int(is_correct), now),
+        )
+    conn.commit()
+
+
+# --- Report ------------------------------------------------------------------
+
+def get_report_stats(conn):
+    finished = conn.execute(
+        "SELECT correct_count, total_questions FROM exercise_sessions WHERE completed_at IS NOT NULL"
+    ).fetchall()
+    exercise_count = len(finished)
+    average_score_pct = (
+        round(sum(r["correct_count"] / r["total_questions"] for r in finished) / exercise_count * 100)
+        if exercise_count
+        else None
+    )
+
+    category_rows = conn.execute(
+        """SELECT category,
+                  SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) AS correct,
+                  COUNT(*) AS total
+           FROM exercise_items
+           WHERE is_correct IS NOT NULL
+           GROUP BY category"""
+    ).fetchall()
+    category_breakdown = {row["category"]: {"correct": row["correct"], "total": row["total"]} for row in category_rows}
+
+    vocab_rows = conn.execute("SELECT * FROM vocab_progress").fetchall()
+    words_mastered = sum(1 for row in vocab_rows if row["times_correct"] >= 2)
+    needs_review = [
+        {"word": row["word"], "gloss": row["gloss"]}
+        for row in vocab_rows
+        if row["last_correct"] == 0
+    ][:12]
+
+    chat_count = conn.execute("SELECT COUNT(*) AS n FROM chat_sessions").fetchone()["n"]
+    message_count = conn.execute("SELECT COUNT(*) AS n FROM chat_messages").fetchone()["n"]
+
+    return {
+        "exercise_count": exercise_count,
+        "average_score_pct": average_score_pct,
+        "category_breakdown": category_breakdown,
+        "words_mastered": words_mastered,
+        "words_total_seen": len(vocab_rows),
+        "needs_review": needs_review,
+        "chat_count": chat_count,
+        "message_count": message_count,
+    }

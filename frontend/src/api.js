@@ -81,3 +81,7 @@ export function answerExercise(id, answer) {
     body: JSON.stringify({ answer }),
   });
 }
+
+export function getReport() {
+  return request("/api/report");
+}

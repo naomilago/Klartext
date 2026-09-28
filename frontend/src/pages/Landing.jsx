@@ -42,6 +42,7 @@ export default function Landing() {
       </div>
 
       <h1
+        onClick={() => navigate("/app")}
         className="fade-in"
         style={{
           margin: 0,
@@ -50,6 +51,7 @@ export default function Landing() {
           fontWeight: 700,
           color: "var(--accent)",
           lineHeight: 1,
+          cursor: "pointer",
         }}
       >
         Klartext
@@ -134,6 +136,13 @@ export default function Landing() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div
+        className="fade-in"
+        style={{ marginTop: 40, textAlign: "center", fontSize: 12, color: "var(--ink-2)" }}
+      >
+        Feito com 💚 por Naomi
       </div>
     </div>
   );

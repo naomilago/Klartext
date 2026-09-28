@@ -111,6 +111,13 @@ TOPIC_SEEDS = [
     ("dias e meses", "der Montag", "segunda-feira"),
 ]
 
+SEED_META = {word: (theme, gloss) for theme, word, gloss in TOPIC_SEEDS}
+
+
+def get_seed_meta(word: str):
+    return SEED_META.get(word)
+
+
 TITLE_TOOL = {
     "name": "set_title",
     "description": "Define um título curto para exibir em uma lista de sessões.",
@@ -210,6 +217,39 @@ CLOSING_TOOL = {
     },
 }
 
+REPORT_TOOL = {
+    "name": "build_report",
+    "description": "Monta o relatório de progresso geral da usuária no Klartext.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "overall_score": {
+                "type": "integer",
+                "description": (
+                    "Nota geral de progresso, de 0 a 100, combinando desempenho nos "
+                    "exercícios, domínio de vocabulário praticado e volume/consistência "
+                    "de prática de conversação. Seja honesto, não infle a nota."
+                ),
+            },
+            "summary": {
+                "type": "string",
+                "description": "Parágrafo em português (3 a 5 frases) resumindo o progresso geral, tom encorajador e honesto.",
+            },
+            "strengths": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "2 a 4 pontos fortes específicos, em português, curtos.",
+            },
+            "improvements": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "2 a 4 pontos a melhorar específicos e acionáveis, em português, curtos.",
+            },
+        },
+        "required": ["overall_score", "summary", "strengths", "improvements"],
+    },
+}
+
 
 def _tool_input(response, tool_name, fallback):
     for block in response.content:
@@ -248,19 +288,50 @@ def generate_title(content: str, fallback: str) -> str:
     return result.get("title", fallback)[:80]
 
 
-def _pick_seed(previous: list[dict]):
-    used_text = " ".join(item["question"] for item in previous).lower()
-    unused = [seed for seed in TOPIC_SEEDS if seed[1].split(" ")[-1].lower() not in used_text]
-    pool = unused or TOPIC_SEEDS
-    return random.choice(pool)
+def _pick_seed(previous: list[dict], progress: dict | None = None):
+    progress = progress or {}
+    used_this_round = {
+        seed[1] for seed in TOPIC_SEEDS
+        if seed[1].split(" ")[-1].lower() in " ".join(item["question"] for item in previous).lower()
+    }
+
+    candidates = []
+    weights = []
+    for theme, word, gloss in TOPIC_SEEDS:
+        if word in used_this_round:
+            continue
+        stats = progress.get(word)
+        if stats and stats["times_correct"] >= 2:
+            continue  # já dominada — não precisa mais praticar
+        if not stats:
+            weight = 4  # nunca vista — prioridade média-alta
+        elif stats["last_correct"] == 0:
+            weight = 6  # errou da última vez — prioridade máxima (revisão)
+        else:
+            weight = 2  # já viu, acertou uma vez — prioridade baixa
+        candidates.append((theme, word, gloss))
+        weights.append(weight)
+
+    if not candidates:
+        candidates = [seed for seed in TOPIC_SEEDS if seed[1] not in used_this_round] or list(TOPIC_SEEDS)
+        weights = [1] * len(candidates)
+
+    return random.choices(candidates, weights=weights, k=1)[0]
 
 
-def generate_question(previous: list[dict]) -> dict:
-    theme, seed_word, seed_gloss = _pick_seed(previous)
+def generate_question(previous: list[dict], progress: dict | None = None) -> dict:
+    theme, seed_word, seed_gloss = _pick_seed(previous, progress)
+    stats = (progress or {}).get(seed_word)
+    review_note = (
+        " A usuária errou essa palavra da última vez — foque em ajudá-la a fixar o uso correto."
+        if stats and stats["last_correct"] == 0
+        else ""
+    )
     seed_line = (
         f"Tema sorteado para esta pergunta: {theme}. "
         f"Palavra/expressão-alvo sugerida: \"{seed_word}\" ({seed_gloss}) — "
         "construa a pergunta em torno dela (pode adaptar a forma gramatical conforme a categoria)."
+        f"{review_note}"
     )
 
     if previous:
@@ -279,7 +350,7 @@ def generate_question(previous: list[dict]) -> dict:
         tool_choice={"type": "tool", "name": "ask_question"},
         messages=[{"role": "user", "content": context}],
     )
-    return _tool_input(
+    result = _tool_input(
         response,
         "ask_question",
         {
@@ -288,6 +359,10 @@ def generate_question(previous: list[dict]) -> dict:
             "question": "Como se diz 'obrigada' em alemão?",
         },
     )
+    result["seed_word"] = seed_word
+    result["seed_theme"] = theme
+    result["seed_gloss"] = seed_gloss
+    return result
 
 
 def evaluate_answer(category: str, question: str, answer: str) -> dict:
@@ -345,3 +420,53 @@ def generate_closing(correct_count: int, total: int, breakdown: dict) -> str:
         response, "closing_message", {"message": "Mandou bem! Continue praticando."}
     )
     return result.get("message", "Mandou bem! Continue praticando.")
+
+
+_LEAKED_TAG_MARKERS = ("</summary>", "<parameter", "</parameter>", "<function")
+
+
+def _sanitize_report_text(text: str) -> str:
+    for marker in _LEAKED_TAG_MARKERS:
+        idx = text.find(marker)
+        if idx != -1:
+            text = text[:idx]
+    return text.strip()
+
+
+def generate_report(stats_text: str) -> dict:
+    fallback = {
+        "overall_score": 0,
+        "summary": "Ainda não há dados suficientes para gerar um relatório.",
+        "strengths": [],
+        "improvements": [],
+    }
+
+    result = fallback
+    for _ in range(3):
+        response = client.messages.create(
+            model=MODEL,
+            max_tokens=600,
+            tools=[REPORT_TOOL],
+            tool_choice={"type": "tool", "name": "build_report"},
+            messages=[
+                {
+                    "role": "user",
+                    "content": (
+                        "Aqui estão as estatísticas de uso do Klartext (tutor de alemão) "
+                        f"até agora:\n\n{stats_text}\n\n"
+                        "Monte um relatório de progresso honesto e encorajador, em português. "
+                        "Se houver pouquíssimo uso ainda, diga isso com gentileza em vez de "
+                        "inventar conquistas."
+                    ),
+                }
+            ],
+        )
+        result = _tool_input(response, "build_report", fallback)
+        summary = result.get("summary", "")
+        if not any(marker in summary for marker in _LEAKED_TAG_MARKERS):
+            return result
+
+    # Every attempt leaked tool-call artifacts into the text — sanitize rather
+    # than show broken markup to the user.
+    result["summary"] = _sanitize_report_text(result.get("summary", "")) or fallback["summary"]
+    return result

@@ -206,7 +206,8 @@ def _question_payload(question):
 def create_exercise():
     with db.get_conn() as conn:
         session_id = db.create_exercise_session(conn, total_questions=10)
-        question = ai.generate_question([])
+        progress = db.get_vocab_progress(conn)
+        question = ai.generate_question([], progress)
         db.add_exercise_item(
             conn,
             session_id,
@@ -215,6 +216,7 @@ def create_exercise():
             question["question"],
             question.get("type", "resposta_livre"),
             _options_json(question),
+            question.get("seed_word"),
         )
         return {"id": session_id, "position": 1, "total_questions": 10, **_question_payload(question)}
 
@@ -285,9 +287,12 @@ def answer_exercise(session_id: int, body: AnswerIn):
         # instead of waiting for it first.
         prior_items = db.get_exercise_items(conn, session_id)
         previous_for_next = [{"category": i["category"], "question": i["question"]} for i in prior_items]
+        progress = db.get_vocab_progress(conn)
 
         eval_future = _executor.submit(ai.evaluate_answer, item["category"], item["question"], body.answer)
-        next_future = _executor.submit(ai.generate_question, previous_for_next) if position < total else None
+        next_future = (
+            _executor.submit(ai.generate_question, previous_for_next, progress) if position < total else None
+        )
 
         evaluation = eval_future.result()
         is_correct = bool(evaluation.get("correct", False))
@@ -299,6 +304,11 @@ def answer_exercise(session_id: int, body: AnswerIn):
         )
         if is_correct:
             db.increment_correct_count(conn, session_id)
+
+        seed_meta = ai.get_seed_meta(item["seed_word"]) if item["seed_word"] else None
+        if seed_meta:
+            theme, gloss = seed_meta
+            db.record_vocab_result(conn, item["seed_word"], theme, gloss, is_correct)
 
         response = {
             "position": position,
@@ -320,6 +330,7 @@ def answer_exercise(session_id: int, body: AnswerIn):
                 next_question["question"],
                 next_question.get("type", "resposta_livre"),
                 _options_json(next_question),
+                next_question.get("seed_word"),
             )
             response["next_question"] = _question_payload(next_question)
         else:
@@ -335,6 +346,34 @@ def answer_exercise(session_id: int, body: AnswerIn):
 
         _executor.submit(_maybe_generate_exercise_title, session_id)
         return response
+
+
+# --- Relatório ---------------------------------------------------------------
+
+@app.get("/api/report")
+def get_report():
+    with db.get_conn() as conn:
+        stats = db.get_report_stats(conn)
+
+    lines = [
+        f"Exercícios finalizados: {stats['exercise_count']}",
+        (
+            f"Média de acerto nos exercícios: {stats['average_score_pct']}%"
+            if stats["average_score_pct"] is not None
+            else "Média de acerto nos exercícios: sem dados ainda"
+        ),
+        f"Palavras praticadas: {stats['words_total_seen']} (dominadas: {stats['words_mastered']})",
+        f"Conversas livres: {stats['chat_count']} ({stats['message_count']} mensagens no total)",
+    ]
+    if stats["category_breakdown"]:
+        lines.append("Desempenho por categoria nos exercícios:")
+        for category, values in stats["category_breakdown"].items():
+            lines.append(f"- {category}: {values['correct']}/{values['total']}")
+    stats_text = "\n".join(lines)
+
+    report = ai.generate_report(stats_text)
+
+    return {**stats, **report}
 
 
 if __name__ == "__main__":

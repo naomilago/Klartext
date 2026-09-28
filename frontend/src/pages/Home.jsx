@@ -10,10 +10,11 @@ import {
   listChats,
   listExercises,
 } from "../api";
-import { MessageCircleIcon, CheckSquareIcon, TrashIcon } from "../components/icons";
+import { MessageCircleIcon, CheckSquareIcon, TrashIcon, BarChartIcon } from "../components/icons";
 import Avatar from "../components/Avatar";
 import ThemeToggle from "../components/ThemeToggle";
 import ConfirmDialog from "../components/ConfirmDialog";
+import Footer from "../components/Footer";
 
 function formatDate(iso) {
   const date = new Date(iso);
@@ -132,7 +133,14 @@ export default function Home() {
         <Link to="/app" style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "var(--accent)" }}>
           Klartext
         </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <Link
+            to="/report"
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, color: "var(--ink-2)" }}
+          >
+            <BarChartIcon size={18} />
+            Relatório
+          </Link>
           <span style={{ fontSize: 14, color: "var(--ink-2)" }}>Olá, Naomi</span>
           <Avatar size={36} />
           <ThemeToggle />
@@ -350,6 +358,30 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <div style={{ padding: "0 56px 8px" }}>
+        <div
+          style={{
+            background: "var(--card)",
+            border: "1px solid var(--border)",
+            borderRadius: 16,
+            padding: 24,
+          }}
+        >
+          <h2 style={{ margin: "0 0 8px", fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600 }}>
+            Sobre o Klartext
+          </h2>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: "21px", color: "var(--ink-2)" }}>
+            Klartext é seu tutor pessoal de alemão: converse livremente com correções na hora,
+            ou treine com exercícios de vocabulário, gramática e tradução. O app guarda seu
+            progresso entre sessões e evita repetir palavras que você já domina, priorizando
+            o que ainda precisa de reforço. Pensado como complemento ao Duolingo, para você
+            treinar alemão de verdade — no seu ritmo.
+          </p>
+        </div>
+      </div>
+
+      <Footer />
 
       <ConfirmDialog
         open={!!confirmState}
