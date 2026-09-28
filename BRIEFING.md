@@ -10,9 +10,12 @@ Tutor de alemão via chat, com correções e exercícios conversacionais, usando
 
 ## 2. Stack
 
-- **Backend/CLI em Python**, gerenciado com **uv** (`uv init`, `uv add`, `uv run`).
-- **Frontend em React** (v2) — projeto separado, a ser construído pela IA (a usuária não domina frontend).
-- Backend e frontend se comunicam via API (ex.: FastAPI expondo endpoints que o React consome) — a definir na v2.
+- **Backend em Python** (`backend/`), gerenciado com **uv** (`uv init`, `uv add`, `uv run`).
+  - `main.py` — API FastAPI (porta 8010) consumida pelo frontend.
+  - `cli.py` — chat de terminal do MVP original, mantido como alternativa.
+  - `klartext/db.py` — persistência em SQLite (chats, exercícios).
+  - `klartext/ai.py` — chamadas à Anthropic (chat, geração de título, geração/avaliação de exercícios).
+- **Frontend em React** (`frontend/`, Vite) — consome a API do backend.
 - Anthropic SDK oficial (`anthropic` no Python), nunca chamadas HTTP cruas.
 - Modelo: `claude-sonnet-5`.
 
@@ -33,19 +36,33 @@ Escopo mínimo pra validar a experiência:
 - Modo de exercícios estruturados (é a v2).
 - Frontend.
 
-## 4. v2 — Frontend (React)
+## 4. v2 — Frontend (React) ✅ implementado
 
-Depois que o MVP em CLI validar a experiência, construir um frontend completo com **duas modalidades**, selecionadas pela usuária:
+Frontend com **duas modalidades**, selecionadas na tela Início:
 
 ### Modo Chat (conversa livre)
 
-Mesma lógica do MVP: conversa livre em alemão, com feedback e correções sob demanda ou quando necessário.
+Conversa livre em alemão, com streaming e correções sob demanda ou quando necessário.
+Respostas renderizadas como **Markdown + LaTeX** (KaTeX). Histórico de conversas
+anteriores acessível pela tela Início, aberto em **modo somente leitura**
+(não dá pra continuar uma conversa antiga — só visualizar).
 
 ### Modo Exercícios (conversacional)
 
-- **A IA inicia a conversa** (primeira mensagem é do tutor, não da usuária).
-- Gera uma **leva de 10 perguntas/exercícios variados** (vocabulário, gramática, tradução, completar frase, etc.), um de cada vez, em formato de pergunta e resposta — mas mantendo o tom conversacional, não um formulário.
-- Ao final da leva: **sumário com feedback e pontuação**.
+- Gera uma **leva de 10 perguntas variadas** (vocabulário, gramática, tradução,
+  completar frase), um de cada vez, alternando entre **múltipla escolha** (cards
+  selecionáveis) e **resposta livre** (campo de texto), com correção pela IA.
+- Ao final: sumário com pontuação, breakdown por categoria e mensagem de
+  encorajamento gerada pela IA.
+- Exercícios anteriores (finalizados ou em andamento) ficam acessíveis pela tela
+  Início, abertos numa tela de revisão que mostra **todas as perguntas de uma vez**
+  (não dá pra continuar um exercício incompleto — só revisar).
+
+### Títulos automáticos
+
+Chats e exercícios recebem um título curto gerado pela IA (em português),
+exibido na lista da tela Início — gerado sob demanda, na primeira vez que a
+lista é carregada.
 
 ## 5. Diretrizes de persona do tutor
 
@@ -64,7 +81,11 @@ Mesma lógica do MVP: conversa livre em alemão, com feedback e correções sob 
 
 ## 7. Próximos passos
 
-1. Scaffold do projeto Python com `uv` (`uv init`, `uv add anthropic`).
-2. Prompt de sistema inicial (persona + regras da seção 5).
-3. Loop de chat simples no terminal com streaming.
-4. Testar por alguns dias reais de uso, ajustar o prompt antes de partir pro frontend.
+1. ~~Scaffold do projeto Python com `uv`.~~ ✅
+2. ~~Prompt de sistema inicial.~~ ✅
+3. ~~Loop de chat simples no terminal com streaming.~~ ✅
+4. ~~Persistência em SQLite.~~ ✅
+5. ~~API FastAPI + frontend React (v2), modo Exercícios, títulos por IA.~~ ✅
+6. Usar por alguns dias reais e ajustar prompts/UX com base no uso (ex.: a IA
+   às vezes erra a avaliação de gênero de substantivos alemães em exercícios —
+   vale observar e considerar ajustar o `EXERCISE_SYSTEM_PROMPT` se for frequente).
