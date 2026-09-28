@@ -338,6 +338,8 @@ def answer_exercise(session_id: int, body: AnswerIn):
 
 
 if __name__ == "__main__":
+    import os
+
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=8010)
+    uvicorn.run(app, host=os.environ.get("HOST", "127.0.0.1"), port=8010)

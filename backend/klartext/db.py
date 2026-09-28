@@ -1,9 +1,10 @@
+import os
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent / "klartext.db"
+DB_PATH = Path(os.environ.get("KLARTEXT_DB_PATH", str(Path(__file__).parent.parent / "klartext.db")))
 GMT_MINUS_3 = timezone(timedelta(hours=-3))
 
 
