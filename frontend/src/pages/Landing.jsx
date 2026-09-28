@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { TutorAvatar, MessageCircleIcon, CheckSquareIcon } from "../components/icons";
 import ThemeToggle from "../components/ThemeToggle";
+import Footer from "../components/Footer";
 
 const FEATURES = [
   {
@@ -26,147 +27,150 @@ export default function Landing() {
         background: "var(--bg)",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 24px",
         position: "relative",
-        textAlign: "center",
       }}
     >
       <div style={{ position: "absolute", top: 24, right: 24 }}>
         <ThemeToggle />
       </div>
 
-      <div className="fade-in" style={{ marginBottom: 20 }}>
-        <TutorAvatar size={64} />
-      </div>
-
-      <h1
-        className="fade-in"
-        style={{
-          margin: 0,
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(48px, 9vw, 84px)",
-          fontWeight: 700,
-          color: "var(--accent)",
-          lineHeight: 1,
-        }}
-      >
-        Klartext
-      </h1>
-
-      <p
-        className="fade-in"
-        style={{
-          margin: "20px 0 0",
-          fontSize: 18,
-          lineHeight: "27px",
-          color: "var(--ink-2)",
-          maxWidth: 480,
-        }}
-      >
-        Seu tutor de alemão para treinar <strong style={{ color: "var(--ink)" }}>conversação de verdade</strong> —
-        complementando o que você já aprende no Duolingo.
-      </p>
-
-      <button
-        onClick={() => navigate("/app")}
-        className="fade-in"
-        style={{
-          marginTop: 32,
-          background: "var(--accent)",
-          color: "#fff",
-          border: "none",
-          fontWeight: 600,
-          fontSize: 16,
-          padding: "14px 36px",
-          borderRadius: 999,
-          cursor: "pointer",
-        }}
-      >
-        Começar a praticar
-      </button>
-
       <div
-        className="fade-in"
         style={{
-          marginTop: 56,
+          flexGrow: 1,
           display: "flex",
-          gap: 20,
-          flexWrap: "wrap",
+          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
-          maxWidth: 640,
+          padding: "40px 24px 24px",
+          textAlign: "center",
         }}
       >
-        {FEATURES.map((feature) => (
-          <div
-            key={feature.title}
-            style={{
-              flex: "1 1 240px",
-              background: "var(--card)",
-              border: "1px solid var(--border)",
-              borderRadius: 16,
-              padding: 20,
-              textAlign: "left",
-              display: "flex",
-              gap: 12,
-              alignItems: "flex-start",
-            }}
-          >
+        <div className="fade-in" style={{ marginBottom: 20 }}>
+          <TutorAvatar size={64} />
+        </div>
+
+        <h1
+          className="fade-in"
+          style={{
+            margin: 0,
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(48px, 9vw, 84px)",
+            fontWeight: 700,
+            color: "var(--accent)",
+            lineHeight: 1,
+          }}
+        >
+          Klartext
+        </h1>
+
+        <p
+          className="fade-in"
+          style={{
+            margin: "20px 0 0",
+            fontSize: 18,
+            lineHeight: "27px",
+            color: "var(--ink-2)",
+            maxWidth: 480,
+          }}
+        >
+          Seu tutor de alemão para treinar <strong style={{ color: "var(--ink)" }}>conversação de verdade</strong> —
+          complementando o que você já aprende no Duolingo.
+        </p>
+
+        <button
+          onClick={() => navigate("/app")}
+          className="fade-in"
+          style={{
+            marginTop: 32,
+            background: "var(--accent)",
+            color: "#fff",
+            border: "none",
+            fontWeight: 600,
+            fontSize: 16,
+            padding: "14px 36px",
+            borderRadius: 999,
+            cursor: "pointer",
+          }}
+        >
+          Começar a praticar
+        </button>
+
+        <div
+          className="fade-in"
+          style={{
+            marginTop: 56,
+            display: "flex",
+            gap: 20,
+            flexWrap: "wrap",
+            justifyContent: "center",
+            maxWidth: 640,
+          }}
+        >
+          {FEATURES.map((feature) => (
             <div
+              key={feature.title}
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background: "var(--accent-tint)",
-                color: "var(--accent)",
+                flex: "1 1 240px",
+                background: "var(--card)",
+                border: "1px solid var(--border)",
+                borderRadius: 16,
+                padding: 20,
+                textAlign: "left",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
+                gap: 12,
+                alignItems: "flex-start",
               }}
             >
-              {feature.icon}
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  background: "var(--accent-tint)",
+                  color: "var(--accent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                {feature.icon}
+              </div>
+              <div>
+                <strong style={{ display: "block", fontSize: 15, fontWeight: 600, marginBottom: 2 }}>{feature.title}</strong>
+                <p style={{ margin: 0, fontSize: 13, lineHeight: "19px", color: "var(--ink-2)" }}>{feature.description}</p>
+              </div>
             </div>
-            <div>
-              <strong style={{ display: "block", fontSize: 15, fontWeight: 600, marginBottom: 2 }}>{feature.title}</strong>
-              <p style={{ margin: 0, fontSize: 13, lineHeight: "19px", color: "var(--ink-2)" }}>{feature.description}</p>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <div
+          className="fade-in"
+          style={{
+            marginTop: 40,
+            width: "100%",
+            maxWidth: 640,
+            background: "var(--card)",
+            border: "1px solid var(--border)",
+            borderRadius: 16,
+            padding: 24,
+            textAlign: "left",
+          }}
+        >
+          <h2 style={{ margin: "0 0 8px", fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600 }}>
+            Sobre o Klartext
+          </h2>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: "21px", color: "var(--ink-2)" }}>
+            Klartext é seu tutor pessoal de alemão: converse livremente com correções na hora,
+            ou treine com exercícios de vocabulário, gramática e tradução. O app guarda seu
+            progresso entre sessões e evita repetir palavras que você já domina, priorizando
+            o que ainda precisa de reforço. Pensado como complemento ao Duolingo, para você
+            treinar alemão de verdade — no seu ritmo.
+          </p>
+        </div>
       </div>
 
-      <div
-        className="fade-in"
-        style={{
-          marginTop: 40,
-          width: "100%",
-          maxWidth: 640,
-          background: "var(--card)",
-          border: "1px solid var(--border)",
-          borderRadius: 16,
-          padding: 24,
-          textAlign: "left",
-        }}
-      >
-        <h2 style={{ margin: "0 0 8px", fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600 }}>
-          Sobre o Klartext
-        </h2>
-        <p style={{ margin: 0, fontSize: 14, lineHeight: "21px", color: "var(--ink-2)" }}>
-          Klartext é seu tutor pessoal de alemão: converse livremente com correções na hora,
-          ou treine com exercícios de vocabulário, gramática e tradução. O app guarda seu
-          progresso entre sessões e evita repetir palavras que você já domina, priorizando
-          o que ainda precisa de reforço. Pensado como complemento ao Duolingo, para você
-          treinar alemão de verdade — no seu ritmo.
-        </p>
-      </div>
-
-      <div
-        className="fade-in"
-        style={{ marginTop: 40, textAlign: "center", fontSize: 12, color: "var(--ink-2)" }}
-      >
-        Feito com 💚 por Naomi
-      </div>
+      <Footer />
     </div>
   );
 }
